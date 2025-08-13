@@ -3,16 +3,13 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 
-# load local .env for local testing; on Streamlit Cloud use Secrets manager
 load_dotenv()
-
 from connect_memory_with_llm import Retriever
 
-st.set_page_config(page_title="Medical Chatbot", page_icon="🏥", layout="centered")
-st.title("🏥 Medical Chatbot")
-st.caption("Search your indexed PDFs (FAISS) ")
+st.set_page_config(page_title="Medical Chatbot (RAG)", page_icon="🏥")
+st.title("🏥 Medical Chatbot (RAG + OpenRouter)")
+st.caption("Search indexed medical PDFs and answer using Mistral (OpenRouter).")
 
-# get OpenRouter key from env or Streamlit secrets
 def get_openrouter_key():
     key = os.getenv("OPENROUTER_API_KEY")
     try:
@@ -23,7 +20,7 @@ def get_openrouter_key():
     return key
 
 if not get_openrouter_key():
-    st.error("Missing OpenRouter API key. Locally set OPENROUTER_API_KEY in .env or add OPENROUTER_API_KEY to Streamlit Secrets.")
+    st.error("Missing OpenRouter API key. Add OPENROUTER_API_KEY to Streamlit Secrets or local .env.")
     st.stop()
 
 @st.cache_resource
@@ -39,16 +36,14 @@ except Exception as e:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# show previous messages
+# display history
 for m in st.session_state.messages:
     with st.chat_message(m["role"]):
         st.markdown(m["content"])
 
-# user input
 user_msg = st.chat_input("Ask your medical question...")
 
 if user_msg:
-    # append and display user message
     st.session_state.messages.append({"role": "user", "content": user_msg})
     with st.chat_message("user"):
         st.markdown(user_msg)
@@ -62,19 +57,15 @@ if user_msg:
             st.error(f"Error: {ex}")
             st.session_state.messages.append({"role": "assistant", "content": f"Error: {ex}"})
         else:
-            # show assistant reply
             with st.chat_message("assistant"):
                 st.markdown(answer)
             st.session_state.messages.append({"role": "assistant", "content": answer})
 
-            # compact sources listing
             if sources:
                 st.markdown("**Sources used:**")
                 for s in sources:
                     meta = s["metadata"]
-                    src = meta.get("source", "unknown")
-                    pg = meta.get("page", "?")
-                    st.markdown(f"- {src} (p.{pg}) — score {s.get('score', 0):.4f}")
-
+                    st.markdown(f"- {meta.get('source','?')} (p.{meta.get('page','?')}) — score {s.get('score',0):.4f}")
 else:
-    st.info("Type a question above — the app searches indexed PDFs and uses Mistral (OpenRouter) to answer.")
+    st.info("Type a question above — the app will search your PDFs and use Mistral (OpenRouter) to answer.")
+
