@@ -1,9 +1,9 @@
-streamlit>=1.18.0
+streamlit>=1.20.0
 requests>=2.28.0
 python-dotenv>=1.0.0
 numpy>=1.24.0
 sentence-transformers>=2.2.2
 pypdf>=3.8.0
-faiss-cpu>=1.7.3  # or 1.8.0.post1 depending on your platform
+faiss-cpu>=1.8.0.post1
 
 
