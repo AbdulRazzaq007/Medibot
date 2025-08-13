@@ -7,7 +7,11 @@ from typing import List, Dict
 import numpy as np
 import requests
 from dotenv import load_dotenv
-from pypdf import PdfReader
+try:
+    from pypdf import PdfReader
+except ImportError:
+    from PyPDF2 import PdfReader  # fallback for environments with PyPDF2
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 
